@@ -1,0 +1,15 @@
+bin
+obj
+.vs
+packages
+
+*.suo
+*.user
+
+Server.exe.lnk
+MiddleServer.exe.lnk
+Client.exe.lnk
+
+
+
+
