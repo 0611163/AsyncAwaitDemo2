@@ -1,73 +1,39 @@
-﻿using Newtonsoft.Json;
-using System.Collections.Concurrent;
-using System.Diagnostics;
+﻿using ClientCommon;
 using Utils;
 
-string _url = "http://localhost:5029/Test/GetValues";
-string _url2 = "http://localhost:5029/Test/Query2";
+TestService testService = new TestService();
+await testService.Start();
 
-StatisticsUtil statUtil = new StatisticsUtil();
-await statUtil.Start();
+/**
+ * 
+ * Client、Client2-Client6
+ * 1. Client3、Client4批量请求接口的吞吐量不行，耗时长
+ * 2. Client5意义不大，可以用Client6代替
+ * 3. 但是Client6需要独立的大线程池
+ * 4. Client2使用的全部是最新的异步语法，一般情况下使用Client2就可以了
+ * 5. 这些demo，最核心的是Client，它可以把回调函数改造成异步，但是需要一个独立的大线程池
+ * 
+ */
 
-await Task.Delay(1000);
+/**
+ * 
+ * Client：意义是把回调包装成异步，但是需要一个独立的大线程池
+ * 
+ */
 
-await Task.Run(() =>
+/**
+ * 
+ * Client、Client2、Client5对比
+ * 1. 总耗时都差不多
+ * 2. Client2不需要大线程池，Client、Client5需要大线程池，如果是小线程池耗时长
+ * 
+ */
+
+await testService.RunTest(async (url, i) =>
 {
-    Task.Run(async () =>
-    {
-        statUtil.Log($"查询第1个接口 开始");
-        await Parallel.ForEachAsync(Enumerable.Range(0, 500), new ParallelOptions() { MaxDegreeOfParallelism = 200 }, async (i, c) =>
-        {
-            Stopwatch sw = Stopwatch.StartNew();
-
-            List<int> counts = new List<int>() { 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30 };
-            Tuple<ConcurrentQueue<int>, ConcurrentDictionary<int, int>> result = await GetValuesAsync(counts);
-            ConcurrentQueue<int> queue = result.Item1;
-            ConcurrentDictionary<int, int> dict = result.Item2;
-
-            statUtil.Log($"查询第1个接口，结束{i}，结果数量：{queue.Count}，去重-->{dict.Count}，耗时：{sw.Elapsed.TotalSeconds:0.000}秒");
-            sw.Stop();
-        });
-        statUtil.Log($"查询第1个接口 结束");
-    });
-
-    Thread.Sleep(500);
-
-    Task.Run(async () =>
-    {
-        statUtil.Log($"查询第2个接口 开始");
-        await Parallel.ForEachAsync(Enumerable.Range(0, 500), new ParallelOptions() { MaxDegreeOfParallelism = 200 }, async (i, c) =>
-        {
-            Stopwatch sw = Stopwatch.StartNew();
-
-            string result = await Query2Async();
-
-            statUtil.Log($"查询第2个接口，结束{i}，耗时：{sw.Elapsed.TotalSeconds:0.000}秒");
-            sw.Stop();
-        });
-        statUtil.Log($"查询第2个接口 结束");
-    });
+    var asyncUtil = new AsyncHttpUtil($"{url}?i={i}");
+    await asyncUtil.BeginGetAsync();
+    return await asyncUtil.EndGetAsync();
 });
 
 Console.ReadLine();
-
-#region GetValuesAsync
-async Task<Tuple<ConcurrentQueue<int>, ConcurrentDictionary<int, int>>> GetValuesAsync(List<int> counts)
-{
-    HttpClient httpClient = HttpClientFactory.GetClient();
-    string postData = JsonConvert.SerializeObject(counts);
-    HttpContent content = new StringContent(postData);
-    content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
-    var result = await (await httpClient.PostAsync(_url, content)).Content.ReadAsStringAsync();
-    return JsonConvert.DeserializeObject<Tuple<ConcurrentQueue<int>, ConcurrentDictionary<int, int>>>(result);
-}
-#endregion
-
-#region Query2Async
-async Task<string> Query2Async()
-{
-    HttpClient httpClient = HttpClientFactory.GetClient();
-    var result = await (await httpClient.GetAsync(_url2)).Content.ReadAsStringAsync();
-    return result;
-}
-#endregion

@@ -7,9 +7,12 @@ packages
 *.user
 
 Server.exe.lnk
-MiddleServer.exe.lnk
 Client.exe.lnk
-
+Client2.exe.lnk
+Client3.exe.lnk
+Client4.exe.lnk
+Client5.exe.lnk
+Client6.exe.lnk
 
 
 

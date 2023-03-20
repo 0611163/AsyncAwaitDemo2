@@ -7,8 +7,6 @@ namespace Server.Controllers
     [Route("[controller]")]
     public class TestController : ControllerBase
     {
-        private Random _rnd = new Random();
-
         private StatisticsUtil _statUtil;
 
         public TestController(StatisticsUtil statisticsUtil)
@@ -18,38 +16,26 @@ namespace Server.Controllers
 
         [HttpGet]
         [Route("[action]")]
-        public async Task<List<int>> GetCounts(int n)
+        public async Task<string> Query(int i)
         {
-            List<int> result = new List<int>();
+            var r = i % 3;
 
-            await Task.Delay(50); //模拟耗时操作
-
-            for (int i = 0; i < n; i++)
+            if (r == 0)
             {
-                result.Add(_rnd.Next(10, 20));
+                await Task.Delay(50); //模拟耗时操作
+            }
+            else if (r == 1)
+            {
+                await Task.Delay(200); //模拟耗时操作
+            }
+            else if (r == 2)
+            {
+                await Task.Delay(500); //模拟耗时操作
             }
 
             _statUtil.AddOne();
-
-            return result;
+            return "测试返回结果";
         }
 
-        [HttpGet]
-        [Route("[action]")]
-        public async Task<List<int>> GetValues(int n)
-        {
-            List<int> result = new List<int>();
-
-            await Task.Delay(50); //模拟耗时操作
-
-            for (int i = 0; i < n; i++)
-            {
-                result.Add(_rnd.Next(0, 100000));
-            }
-
-            _statUtil.AddOne();
-
-            return result;
-        }
     }
 }
