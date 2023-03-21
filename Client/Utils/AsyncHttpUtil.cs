@@ -47,7 +47,7 @@ namespace Utils
         /// </summary>
         public async Task<string> EndGetAsync()
         {
-            while (true) // note: 这里通过while(true)和SpinWait，等待返回结果
+            while (true) // note: 等待返回结果
             {
                 if (DateTime.Now.Subtract(_startTime).TotalSeconds > 180) //超时
                 {
