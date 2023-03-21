@@ -14,7 +14,7 @@ namespace Utils
     public class AsyncHttpUtil
     {
         /// <summary>
-        /// 结束异步GET请求
+        /// 异步GET请求
         /// </summary>
         public static async Task<string> GetAsync(string url)
         {
