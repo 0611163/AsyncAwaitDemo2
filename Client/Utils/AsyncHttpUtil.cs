@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Utils
@@ -12,11 +13,6 @@ namespace Utils
     /// </summary>
     public class AsyncHttpUtil
     {
-        /// <summary>
-        /// 线程池
-        /// </summary>
-        private static readonly TaskSchedulerEx _task = new TaskSchedulerEx(0, 100);
-
         private string _url;
 
         private DateTime _startTime;
@@ -49,36 +45,31 @@ namespace Utils
         /// <summary>
         /// 结束异步GET请求
         /// </summary>
-        public Task<string> EndGetAsync()
+        public async Task<string> EndGetAsync()
         {
-            // note: 把_task.Run修改为Task.Run试试？思考为什么此处使用Task.Run不行？
-            return _task.Run(() =>
+            while (true) // note: 这里通过while(true)和SpinWait，等待返回结果
             {
-                SpinWait spinWait = new SpinWait();
-                while (true) // note: 这里通过while(true)和SpinWait，等待返回结果
+                if (DateTime.Now.Subtract(_startTime).TotalSeconds > 180) //超时
                 {
-                    if (DateTime.Now.Subtract(_startTime).TotalSeconds > 180) //超时
-                    {
-                        break;
-                    }
-                    else if (_asyncResult.IsCompleted) //已完成
-                    {
-                        break;
-                    }
-                    else //未完成
-                    {
-                        spinWait.SpinOnce();
-                    }
+                    break;
                 }
+                else if (_asyncResult.IsCompleted) //已完成
+                {
+                    break;
+                }
+                else //未完成
+                {
+                    await Task.Delay(1);
+                }
+            }
 
-                HttpWebRequest request = (HttpWebRequest)_asyncResult.AsyncState;
-                HttpWebResponse response = (HttpWebResponse)request.EndGetResponse(_asyncResult);
-                Stream stream = response.GetResponseStream();
-                StreamReader sr = new StreamReader(stream, Encoding.UTF8);
-                string content = sr.ReadToEnd();
-                stream.Close();
-                return content;
-            });
+            HttpWebRequest request = (HttpWebRequest)_asyncResult.AsyncState;
+            HttpWebResponse response = (HttpWebResponse)request.EndGetResponse(_asyncResult);
+            Stream stream = response.GetResponseStream();
+            StreamReader sr = new StreamReader(stream, Encoding.UTF8);
+            string content = sr.ReadToEnd();
+            stream.Close();
+            return content;
         }
     }
 }

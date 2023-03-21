@@ -14,7 +14,7 @@ await testService.Start();
  * 
  * Client、Client2、Client5对比
  * 1. 总耗时都差不多
- * 2. Client2不需要大线程池，Client、Client5需要大线程池，如果是小线程池耗时长
+ * 2. Client、Client2不需要大线程池，Client5需要大线程池，如果是小线程池耗时长
  * 
  */
 

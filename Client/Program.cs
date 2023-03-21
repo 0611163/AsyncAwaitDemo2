@@ -11,13 +11,13 @@ await testService.Start();
  * 2. Client5意义不大，可以用Client6代替
  * 3. 但是Client6需要独立的大线程池
  * 4. Client2使用的全部是最新的异步语法，一般情况下使用Client2就可以了
- * 5. 这些demo，最核心的是Client，它可以把回调函数改造成异步，但是需要一个独立的大线程池
+ * 5. 这些demo，最核心的是Client，它可以把回调函数改造成异步
  * 
  */
 
 /**
  * 
- * Client：意义是把回调包装成异步，但是需要一个独立的大线程池
+ * Client：意义是把回调包装成异步
  * 
  */
 
@@ -25,7 +25,7 @@ await testService.Start();
  * 
  * Client、Client2、Client5对比
  * 1. 总耗时都差不多
- * 2. Client2不需要大线程池，Client、Client5需要大线程池，如果是小线程池耗时长
+ * 2. Client、Client2不需要大线程池，Client5需要大线程池，如果是小线程池耗时长
  * 
  */
 

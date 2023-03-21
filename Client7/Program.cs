@@ -6,15 +6,7 @@ await testService.Start();
 
 /**
  * 
- * Client5：意义是把同步包装成异步，但可能需要独立线程池，而且是大线程池
- * 
- */
-
-/**
- * 
- * Client、Client2、Client5对比
- * 1. 总耗时都差不多
- * 2. Client、Client2不需要大线程池，Client5需要大线程池，如果是小线程池耗时长
+ * Client7：和Client对比，Client没有使用线程池，Client7使用了线程池
  * 
  */
 
