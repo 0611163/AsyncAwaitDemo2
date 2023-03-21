@@ -7,6 +7,7 @@ await testService.Start();
 /**
  * 
  * Client7：和Client对比，Client没有使用线程池，Client7使用了线程池
+ * 1. 和Client对比，Client7没有意义了
  * 
  */
 

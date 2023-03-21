@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Utils
@@ -15,10 +16,10 @@ namespace Utils
     {
         /// <summary>
         /// 线程池
-        /// note: 对比测试：把new TaskSchedulerEx(0, 200)修改为new TaskSchedulerEx(0, 50)，然后对比总耗时
+        /// note: 对比测试：把new TaskSchedulerEx(0, 100)修改为new TaskSchedulerEx(0, 20)，然后对比总耗时
         /// note: 测试结果：线程池越大，总耗时越短
         /// </summary>
-        private static readonly TaskSchedulerEx _task = new TaskSchedulerEx(0, 200);
+        private static readonly TaskSchedulerEx _task = new TaskSchedulerEx(0, 100);
 
         private string _url;
 
@@ -53,29 +54,25 @@ namespace Utils
         /// <summary>
         /// 结束异步GET请求
         /// </summary>
-        public Task<string> EndGetAsync()
+        public async Task<string> EndGetAsync()
         {
-            return _task.Run(() => // note: 在线程中等待返回结果
+            while (true)
             {
-                SpinWait spinWait = new SpinWait();
-                while (true)
+                if (DateTime.Now.Subtract(_startTime).TotalSeconds > 180) //超时
                 {
-                    if (DateTime.Now.Subtract(_startTime).TotalSeconds > 180) //超时
-                    {
-                        break;
-                    }
-                    else if (_result != null) //已完成
-                    {
-                        break;
-                    }
-                    else //未完成
-                    {
-                        spinWait.SpinOnce();
-                    }
+                    break;
                 }
+                else if (_result != null) //已完成
+                {
+                    break;
+                }
+                else //未完成
+                {
+                    await Task.Delay(1);
+                }
+            }
 
-                return _result;
-            });
+            return _result;
         }
     }
 }
